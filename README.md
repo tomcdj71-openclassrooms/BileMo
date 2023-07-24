@@ -2,12 +2,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
 [![Twitter: tomcdj71](https://img.shields.io/twitter/follow/tomcdj71.svg?style=social)](https://twitter.com/tomcdj71)
 
-> 6th project of my OpenClassrooms courses
+> 7th project of the PHP / Symfony course on OpenClassrooms: develop the API of a mobile phone sales site
 
 ## Pre-requisites :
 - PHP 8.1
 - Composer
-- npm/yarn (I used pnpm)
 - Symfony CLI
 ---
 
@@ -15,10 +14,8 @@
 
 ```sh
 git clone https://github.com/tomcdj71-openclassrooms/BileMo
-cd Snowtricks
+cd BileMo
 composer install --optimize-autoloader
-yarn install --force
-yarn build
 symfony console d:d:c
 symfony console d:m:m
 symfony console d:f:l
@@ -26,15 +23,57 @@ symfony serve
 ```
 
 ## Features
-
-- [] Api Endpoint 'products list' (/products);
-- [] Api Endpoint 'product details' (/products/:prodcutId);
-- [] Api Endpoint 'client users list' (/clients/:clienId/users)
-- [] Api Endpoint 'client user detail' (/clients/:clientId/users/:userId)
-- [] Api Endpoint 'client new user' (/clients/:clientId/users)
-- [] Api Endpoint 'client delete user' (/clients/:clientId/users)
-- [] Api Documentation
 - [] Api Authentication (JWT)
+- [] Api for retrieving products of BileMo and customers of BileMo customers
+
+## API Endpoints
+### Products
+
+- **List all products**
+
+  `GET /products`
+
+  Get a list of all products.
+
+- **Product details**
+
+  `GET /products/:productId`
+
+  Get details of a specific product identified by `productId`.
+
+### Client Users
+
+- **List all client users**
+
+  `GET /users`
+
+  Get a list of all users (customers) belonging to the logged-in client.
+
+- **Client user detail**
+
+  `GET /users/:userId`
+
+  Get details of a specific user (customer) belonging to the logged-in client.
+
+- **Create a new client user**
+
+  `POST /users`
+
+  Create a new user (customer) for the logged-in client.
+
+- **Delete a client user**
+
+  `DELETE /users/:userId`
+
+  Delete a user (customer) belonging to the logged-in client.
+
+### API Documentation
+
+- **API Documentation**
+
+  `GET /docs`
+
+  Access the API documentation to explore available endpoints and usage details.
 
 ## Usage
 
