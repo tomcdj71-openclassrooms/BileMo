@@ -1,4 +1,4 @@
-# Welcome to Snowtricks 👋
+# Welcome to BileMo 👋
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
 [![Twitter: tomcdj71](https://img.shields.io/twitter/follow/tomcdj71.svg?style=social)](https://twitter.com/tomcdj71)
 
