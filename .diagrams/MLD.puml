@@ -1,0 +1,37 @@
+@startuml
+left to right direction
+skinparam actorStyle Awesome
+skinparam ArrowThickness 1
+!theme spacelab
+skinparam backgroundColor #EEEEEE
+skinparam shadowing true
+
+entity "Client" as client {
+  +id : integer
+  --
+  name : string
+  email : string
+  password : string
+  accessToken : string
+}
+
+entity "User" as user {
+  +id : integer
+  --
+  firstName : string
+  lastName : string
+  email : string
+}
+
+entity "Product" as product {
+  +id : integer
+  --
+  name : string
+  description : string
+  price : double
+}
+
+client ||..o{ user : has
+client ||..o{ product : accesses
+
+@enduml

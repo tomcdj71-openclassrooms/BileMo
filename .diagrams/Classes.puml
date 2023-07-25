@@ -1,0 +1,35 @@
+@startuml
+left to right direction
+skinparam actorStyle Awesome
+skinparam ArrowThickness 1
+!theme spacelab
+skinparam backgroundColor #EEEEEE
+skinparam shadowing true
+
+'Client / Company'
+class Client {
+  {static} +id: int
+  +name: String
+  +email: String
+  +password: String
+  +accessToken: String
+}
+
+class User {
+  {static} +id: int
+  +firstName: String
+  +lastName: String
+  +email: String
+}
+
+class Product {
+  {static} +id: int
+  +name: String
+  +description: String
+  +price: double
+}
+
+Client "1" --> "*" User: has
+Client --> "*" Product: accesses
+
+@enduml
