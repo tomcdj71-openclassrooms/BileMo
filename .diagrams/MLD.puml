@@ -12,10 +12,9 @@ entity "Client" as client {
   name : string
   email : string
   password : string
-  accessToken : string
 }
 
-entity "User" as user {
+entity "Customer" as customer {
   +id : integer
   --
   firstName : string
@@ -31,7 +30,7 @@ entity "Product" as product {
   price : double
 }
 
-client ||..o{ user : has
+client ||..o{ customer : has
 client ||..o{ product : accesses
 
 @enduml

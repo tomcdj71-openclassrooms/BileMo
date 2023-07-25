@@ -12,10 +12,9 @@ class Client {
   +name: String
   +email: String
   +password: String
-  +accessToken: String
 }
 
-class User {
+class Customer {
   {static} +id: int
   +firstName: String
   +lastName: String
@@ -29,7 +28,7 @@ class Product {
   +price: double
 }
 
-Client "1" --> "*" User: has
+Client "1" --> "*" Customer: has
 Client --> "*" Product: accesses
 
 @enduml
