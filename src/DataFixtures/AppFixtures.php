@@ -2,14 +2,22 @@
 
 namespace App\DataFixtures;
 
-use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Persistence\ObjectManager;
-use App\Entity\Customer;
 use App\Entity\Client;
 use App\Entity\Product;
+use App\Entity\Customer;
+use Doctrine\Persistence\ObjectManager;
+use Doctrine\Bundle\FixturesBundle\Fixture;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
+    private \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface $passwordHasher;
+
+    public function __construct(UserPasswordHasherInterface $passwordHasher)
+    {
+        $this->passwordHasher = $passwordHasher;
+    }
+    
     public function load(ObjectManager $manager): void
     {
         // Create 4 clients
@@ -17,7 +25,7 @@ class AppFixtures extends Fixture
             $client = new Client();
             $client->setName('Company' . $i);
             $client->setEmail('company' . $i . '@company.com');
-            $client->setPassword('securepassword' . $i);
+            $client->setPassword($this->passwordHasher->hashPassword($client, 'password'));
             $manager->persist($client);
         }
 
