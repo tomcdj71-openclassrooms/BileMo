@@ -2,11 +2,11 @@
 
 namespace App\EventSubscriber;
 
-use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 class ExceptionSubscriber implements EventSubscriberInterface
 {
@@ -17,14 +17,14 @@ class ExceptionSubscriber implements EventSubscriberInterface
         if ($exception instanceof HttpException) {
             $data = [
                 'status' => $exception->getStatusCode(),
-                'message' => $exception->getMessage()
+                'message' => $exception->getMessage(),
             ];
 
             $event->setResponse(new JsonResponse($data));
         } else {
             $data = [
                 'status' => 500,
-                'message' => $exception->getMessage()
+                'message' => $exception->getMessage(),
             ];
 
             $event->setResponse(new JsonResponse($data));
@@ -34,7 +34,7 @@ class ExceptionSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::EXCEPTION => 'onKernelException'
+            KernelEvents::EXCEPTION => 'onKernelException',
         ];
     }
 }

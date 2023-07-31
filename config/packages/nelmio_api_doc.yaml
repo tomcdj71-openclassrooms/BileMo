@@ -1,17 +1,475 @@
 nelmio_api_doc:
-    documentation:
-        info:
-            title: BileMo API
-            description: BileMo
-            version: 1.0.0
-        components:
-            securitySchemes:
-                Bearer:
-                    type: http
-                    scheme: bearer
-                    bearerFormat: JWT
-        security:
-            - Bearer: []
-    areas: # to filter documented areas
-        path_patterns:
-            - ^/api(?!/docs) # Accepts routes under /api except /api/doc
+  documentation:
+    info:
+      title: BileMo API
+      description: BileMo
+      version: 1.0.0
+    components:
+      securitySchemes:
+        Bearer:
+          type: http
+          scheme: bearer
+          bearerFormat: JWT
+          in: header
+    security:
+      - Bearer: []
+    paths:
+      /api/login_check:
+        post:
+          tags:
+            - Login
+          summary: Obtenir un token JWT pour se connecter
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  properties:
+                    username:
+                      type: string
+                    password:
+                      type: string
+                  type: object
+          responses:
+            "200":
+              description: OK
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                      refresh_token:
+                        type: string
+            "400":
+              description: Données invalides.
+            "401":
+              description: Identifiants invalides.
+          security: []
+      /api/users:
+        get:
+          tags:
+            - Customers
+          summary: Obtenir la liste des clients
+          operationId: getCustomersList
+          parameters:
+            - name: page
+              in: query
+              description: Numéro de page
+              schema:
+                type: integer
+              required: false
+            - name: limit
+              in: query
+              description: Nombre d'utilisateurs par page
+              schema:
+                type: integer
+              required: false
+          responses:
+            "200":
+              description: Renvoie la collection d'utilisateurs
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      _embedded:
+                        type: object
+                        properties:
+                          users:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                firstName:
+                                  type: string
+                                lastName:
+                                  type: string
+                                _links:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      self:
+                                        type: object
+                                        properties:
+                                          href:
+                                            type: string
+                                      update:
+                                        type: object
+                                        properties:
+                                          href:
+                                            type: string
+                                      delete:
+                                        type: object
+                                        properties:
+                                          href:
+                                            type: string
+                      _links:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            self:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                            post:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                            first:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                            next:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                            previous:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                            last:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                      page:
+                        type: integer
+                      pages:
+                        type: integer
+                      limit:
+                        type: integer
+                      count:
+                        type: integer
+                      total:
+                        type: integer
+        post:
+          tags:
+            - Customers
+          summary: Créer un nouvel utilisateur
+          operationId: createCustomer
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  properties:
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    email:
+                      type: string
+                  type: object
+          responses:
+            "201":
+              description: Utilisateur créé
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
+                      email:
+                        type: string
+            "400":
+              description: Données invalides
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+            "409":
+              description: L'utilisateur existe déjà
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+      /api/users/{id}:
+        get:
+          tags:
+            - Customers
+          summary: Obtenir le détail d'un utilisateur
+          operationId: getDetailCustomer
+          parameters:
+            - name: id
+              in: path
+              description: ID de l'utilisateur
+              schema:
+                type: integer
+              required: true
+          responses:
+            "200":
+              description: Retourne les coordonnées de l'utilisateur
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
+                      email:
+                        type: string
+            "404":
+              description: Utilisateur non trouvé
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+        put:
+          tags:
+            - Customers
+          summary: Mettre à jour un utilisateur
+          operationId: updateCustomer
+          parameters:
+            - name: id
+              in: path
+              description: ID de l'utilisateur
+              schema:
+                type: integer
+              required: true
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  properties:
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    email:
+                      type: string
+                  type: object
+          responses:
+            "200":
+              description: Utilisateur mis à jour
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
+                      email:
+                        type: string
+            "400":
+              description: Données invalides
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+            "404":
+              description: Utilisateur non trouvé
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+        delete:
+          tags:
+            - Customers
+          summary: Delete a customer
+          operationId: deleteCustomer
+          parameters:
+            - name: id
+              in: path
+              description: ID de l'utilisateur
+              schema:
+                type: integer
+              required: true
+          responses:
+            "204":
+              description: Utilisateur supprimé
+            "404":
+              description: Utilisateur non trouvé
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+      /api/products:
+        get:
+          tags:
+            - Products
+          summary: Obtenir la liste des produits
+          operationId: getProductsList
+          parameters:
+            - name: page
+              in: query
+              description: Numéro de page
+              schema:
+                type: integer
+              required: false
+            - name: limit
+              in: query
+              description: Nombre de produits par page
+              schema:
+                type: integer
+              required: false
+          responses:
+            "200":
+              description: Renvoie la collection de produits
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      _embedded:
+                        type: object
+                        properties:
+                          products:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                description:
+                                  type: string
+                                price:
+                                  type: integer
+                                _links:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      self:
+                                        type: object
+                                        properties:
+                                          href:
+                                            type: string
+                                      update:
+                                        type: object
+                                        properties:
+                                          href:
+                                            type: string
+                                      delete:
+                                        type: object
+                                        properties:
+                                          href:
+                                            type: string
+                      _links:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            self:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                            post:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                            first:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                            next:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                            previous:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                            last:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                      page:
+                        type: integer
+                      pages:
+                        type: integer
+                      limit:
+                        type: integer
+                      count:
+                        type: integer
+                      total:
+                        type: integer
+      /api/products/{id}:
+        get:
+          tags:
+            - Products
+          summary: Obtenir le détail d'un produit
+          operationId: getDetailProduct
+          parameters:
+            - name: id
+              in: path
+              description: ID du produit
+              schema:
+                type: integer
+              required: true
+          responses:
+            "200":
+              description: Retourne les détails du produit
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      description:
+                        type: string
+                      price:
+                        type: integer
+            "404":
+              description: Produit non trouvé
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+      /api/doc:
+        get:
+          tags:
+            - Documentation
+          summary: Obtenir la documentation
+          operationId: getDocumentation
+          responses:
+            "200":
+              description: Retourne la documentation
+              content:
+                text/html:
+                  schema:
+                    type: string
+  areas:
+    path_patterns:
+      - ^/api(?!/docs)
