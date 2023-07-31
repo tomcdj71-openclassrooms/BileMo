@@ -37,7 +37,7 @@ class AppFixtures extends Fixture
             $customer->setLastName($i);
             $customer->setEmail('client'.$i.'@final.com');
             $client = $this->getReference('client'.rand(0, 2));
-            $customer->setClient($client);            
+            $customer->setClient($client);
             $manager->persist($customer);
         }
 
@@ -54,4 +54,3 @@ class AppFixtures extends Fixture
         $manager->flush();
     }
 }
-

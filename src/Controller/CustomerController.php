@@ -8,8 +8,6 @@ use App\Repository\CustomerRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
-use OpenApi\Attributes as OA;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,9 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
-
 
 class CustomerController extends AbstractController
 {
@@ -42,10 +38,11 @@ class CustomerController extends AbstractController
                 ($page - 1) * $limit
             );
         } catch (\Exception $e) {
-            dump('Exception occurred: ' . $e->getMessage());
+            dump('Exception occurred: '.$e->getMessage());
         }
         $total = $customerRepository->count(['client' => $client]);
         $pages = (int) ceil($total / $limit);
+
         return $this->json(
             [
                 '_embedded' => [
@@ -128,7 +125,7 @@ class CustomerController extends AbstractController
     public function createCustomer(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ClientRepository $clientRepository): JsonResponse
     {
         $loggedClient = $this->getUser();
-        if (null === $loggedClient) {
+        if (!$loggedClient instanceof \Symfony\Component\Security\Core\User\UserInterface) {
             return new JsonResponse(['message' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
         $customer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
@@ -147,7 +144,8 @@ class CustomerController extends AbstractController
     /**
      * Cette méthode permet de mettre à jour un utilisateur.
      */
-    public function updateCustomer(Request $request, SerializerInterface $serializer, Customer $currentCustomer, EntityManagerInterface $em, ClientRepository $clientRepository, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse {
+    public function updateCustomer(Request $request, SerializerInterface $serializer, Customer $currentCustomer, EntityManagerInterface $em, ClientRepository $clientRepository, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
+    {
         $loggedClient = $this->getUser();
         if ($currentCustomer->getClient() !== $loggedClient) {
             throw $this->createNotFoundException('Customer not found.');
@@ -164,7 +162,7 @@ class CustomerController extends AbstractController
         $currentCustomer->setClient($loggedClient);
         $em->persist($currentCustomer);
         $em->flush();
-        $cache->invalidateTags(["customersCache"]);
+        $cache->invalidateTags(['customersCache']);
 
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }

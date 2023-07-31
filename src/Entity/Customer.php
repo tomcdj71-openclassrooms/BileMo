@@ -2,8 +2,8 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use App\Repository\CustomerRepository;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
@@ -15,15 +15,15 @@ class Customer
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["getCustomer", "getClient"])]
+    #[Groups(['getCustomer', 'getClient'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["getCustomer", "getClient"])]
+    #[Groups(['getCustomer', 'getClient'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["getCustomer", "getClient"])]
+    #[Groups(['getCustomer', 'getClient'])]
     private ?string $email = null;
 
     #[ORM\ManyToOne(inversedBy: 'customers')]
