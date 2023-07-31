@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\CustomerRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
 class Customer
@@ -14,15 +15,24 @@ class Customer
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 60)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 2, max: 60)]
+    #[Assert\NoSuspiciousCharacters]
     #[Groups(['getCustomer', 'getClient'])]
     private ?string $firstName = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 60)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 2, max: 60)]
+    #[Assert\NoSuspiciousCharacters]
     #[Groups(['getCustomer', 'getClient'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Email]
+    #[Assert\Length(max: 255)]
     #[Groups(['getCustomer', 'getClient'])]
     private ?string $email = null;
 
