@@ -122,16 +122,25 @@ class CustomerController extends AbstractController
      * Cette méthode permet de créer un utilisateur.
      */
     #[Route('/users', name: 'createCustomer', methods: ['POST'])]
-    public function createCustomer(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ClientRepository $clientRepository): JsonResponse
+    public function createCustomer(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
         $loggedClient = $this->getUser();
         if (!$loggedClient instanceof \Symfony\Component\Security\Core\User\UserInterface) {
             return new JsonResponse(['message' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
-        $customer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
-        $content = $request->toArray();
-        $idClient = $content['idClient'] ?? -1;
-        $customer->setClient($loggedClient);
+        $data = json_decode($request->getContent(), true);
+        $customer = new Customer();
+        $customer->setFirstName($data['firstName']);
+        $customer->setLastName($data['lastName']);
+        $customer->setEmail($data['email']);
+        $errors = $validator->validate($customer);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[$error->getPropertyPath()][] = $error->getMessage();
+            }
+            return new JsonResponse($errorMessages, JsonResponse::HTTP_BAD_REQUEST);
+        }
         $em->persist($customer);
         $em->flush();
         $context = SerializationContext::create()->setGroups(['getCustomer']);
@@ -144,7 +153,7 @@ class CustomerController extends AbstractController
     /**
      * Cette méthode permet de mettre à jour un utilisateur.
      */
-    public function updateCustomer(Request $request, SerializerInterface $serializer, Customer $currentCustomer, EntityManagerInterface $em, ClientRepository $clientRepository, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
+    public function updateCustomer(Request $request, SerializerInterface $serializer, Customer $currentCustomer, EntityManagerInterface $em, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
     {
         $loggedClient = $this->getUser();
         if ($currentCustomer->getClient() !== $loggedClient) {

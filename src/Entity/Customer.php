@@ -20,21 +20,21 @@ class Customer
     #[Assert\Length(min: 2, max: 60)]
     #[Assert\NoSuspiciousCharacters]
     #[Groups(['getCustomer', 'getClient'])]
-    private ?string $firstName = null;
+    private string $firstName;
 
     #[ORM\Column(length: 60)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 60)]
     #[Assert\NoSuspiciousCharacters]
     #[Groups(['getCustomer', 'getClient'])]
-    private ?string $lastName = null;
+    private string $lastName;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Assert\Email]
     #[Assert\Length(max: 255)]
     #[Groups(['getCustomer', 'getClient'])]
-    private ?string $email = null;
+    private string $email;
 
     #[ORM\ManyToOne(inversedBy: 'customers')]
     #[ORM\JoinColumn(nullable: true)]
