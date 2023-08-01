@@ -11,6 +11,70 @@ nelmio_api_doc:
           scheme: bearer
           bearerFormat: JWT
           in: header
+      responses:
+        invalidData:
+          description: Erreur de validation
+          content:
+            application/hal+json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        invalidStructure:
+          description: Structure de données invalide
+          content:
+            application/hal+json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        unauthorized:
+          description: Non autorisé
+          content:
+            application/hal+json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        serverError:
+          description: Erreur serveur
+          content:
+            application/hal+json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        forbidden:
+          description: Accès refusé
+          content:
+            application/hal+json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        notFound:
+          description: Ressource non trouvée
+          content:
+            application/hal+json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        noContent:
+          description: Ressource supprimée
+          content:
+            application/hal+json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
     security:
       - Bearer: []
     paths:
@@ -33,18 +97,18 @@ nelmio_api_doc:
             "200":
               description: OK
               content:
-                application/json:
+                application/hal+json:
                   schema:
                     type: object
                     properties:
                       token:
                         type: string
-                      refresh_token:
-                        type: string
             "400":
-              description: Données invalides.
-            "401":
-              description: Identifiants invalides.
+              $ref: '#/components/responses/invalidStructure'
+            "422":
+              $ref: '#/components/responses/invalidData'
+            "500":
+              $ref: '#/components/responses/serverError'            
           security: []
       /api/users:
         get:
@@ -69,7 +133,7 @@ nelmio_api_doc:
             "200":
               description: Renvoie la collection d'utilisateurs
               content:
-                application/json:
+                application/hal+json:
                   schema:
                     type: object
                     properties:
@@ -150,6 +214,10 @@ nelmio_api_doc:
                         type: integer
                       total:
                         type: integer
+            "401":
+              $ref: '#/components/responses/unauthorized'
+            "500":
+              $ref: '#/components/responses/serverError'
         post:
           tags:
             - Customers
@@ -157,7 +225,7 @@ nelmio_api_doc:
           operationId: createCustomer
           requestBody:
             content:
-              application/json:
+              application/hal+json:
                 schema:
                   properties:
                     firstName:
@@ -171,7 +239,7 @@ nelmio_api_doc:
             "201":
               description: Utilisateur créé
               content:
-                application/json:
+                application/hal+json:
                   schema:
                     type: object
                     properties:
@@ -182,23 +250,13 @@ nelmio_api_doc:
                       email:
                         type: string
             "400":
-              description: Données invalides
-              content:
-                application/json:
-                  schema:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-            "409":
-              description: L'utilisateur existe déjà
-              content:
-                application/json:
-                  schema:
-                    type: object
-                    properties:
-                      message:
-                        type: string
+              $ref: '#/components/responses/invalidStructure'
+            "401":
+              $ref: '#/components/responses/unauthorized'
+            "422":
+              $ref: '#/components/responses/invalidData'
+            "500":
+              $ref: '#/components/responses/serverError'
       /api/users/{id}:
         get:
           tags:
@@ -216,7 +274,7 @@ nelmio_api_doc:
             "200":
               description: Retourne les coordonnées de l'utilisateur
               content:
-                application/json:
+                application/hal+json:
                   schema:
                     type: object
                     properties:
@@ -226,15 +284,15 @@ nelmio_api_doc:
                         type: string
                       email:
                         type: string
+            "401":
+              $ref: '#/components/responses/unauthorized'
+            "403":
+              $ref: '#/components/responses/forbidden'
             "404":
-              description: Utilisateur non trouvé
-              content:
-                application/json:
-                  schema:
-                    type: object
-                    properties:
-                      message:
-                        type: string
+              $ref: '#/components/responses/notFound'
+              description: Utilisateur non trouvé.
+            "500":
+              $ref: '#/components/responses/serverError'
         put:
           tags:
             - Customers
@@ -249,7 +307,7 @@ nelmio_api_doc:
               required: true
           requestBody:
             content:
-              application/json:
+              application/hal+json:
                 schema:
                   properties:
                     firstName:
@@ -263,7 +321,7 @@ nelmio_api_doc:
             "200":
               description: Utilisateur mis à jour
               content:
-                application/json:
+                application/hal+json:
                   schema:
                     type: object
                     properties:
@@ -273,28 +331,24 @@ nelmio_api_doc:
                         type: string
                       email:
                         type: string
-            "400":
-              description: Données invalides
-              content:
-                application/json:
-                  schema:
-                    type: object
-                    properties:
-                      message:
-                        type: string
+            "204":
+              $ref: '#/components/responses/noContent'
+              description: Utilisateur mis à jour
+            "401":
+              $ref: '#/components/responses/unauthorized'
+            "403":
+              $ref: '#/components/responses/forbidden'
             "404":
+              $ref: '#/components/responses/notFound'
               description: Utilisateur non trouvé
-              content:
-                application/json:
-                  schema:
-                    type: object
-                    properties:
-                      message:
-                        type: string
+            "422":
+              $ref: '#/components/responses/invalidData'
+            "500":
+              $ref: '#/components/responses/serverError'
         delete:
           tags:
             - Customers
-          summary: Delete a customer
+          summary: Supprime un utilisateur
           operationId: deleteCustomer
           parameters:
             - name: id
@@ -305,16 +359,17 @@ nelmio_api_doc:
               required: true
           responses:
             "204":
+              $ref: '#/components/responses/noContent'
               description: Utilisateur supprimé
+            "401":
+              $ref: '#/components/responses/unauthorized'
+            "403":
+              $ref: '#/components/responses/forbidden'
             "404":
-              description: Utilisateur non trouvé
-              content:
-                application/json:
-                  schema:
-                    type: object
-                    properties:
-                      message:
-                        type: string
+              $ref: '#/components/responses/notFound'
+              description: Utilisateur non trouvé.
+            "500":
+              $ref: '#/components/responses/serverError'
       /api/products:
         get:
           tags:
@@ -338,7 +393,7 @@ nelmio_api_doc:
             "200":
               description: Renvoie la collection de produits
               content:
-                application/json:
+                application/hal+json:
                   schema:
                     type: object
                     properties:
@@ -421,6 +476,10 @@ nelmio_api_doc:
                         type: integer
                       total:
                         type: integer
+            "401":
+              $ref: '#/components/responses/unauthorized'
+            "500":
+              $ref: '#/components/responses/serverError'
       /api/products/{id}:
         get:
           tags:
@@ -438,7 +497,7 @@ nelmio_api_doc:
             "200":
               description: Retourne les détails du produit
               content:
-                application/json:
+                application/hal+json:
                   schema:
                     type: object
                     properties:
@@ -448,15 +507,15 @@ nelmio_api_doc:
                         type: string
                       price:
                         type: integer
+            "401":
+              $ref: '#/components/responses/unauthorized'
+            "403":
+              $ref: '#/components/responses/forbidden'
             "404":
-              description: Produit non trouvé
-              content:
-                application/json:
-                  schema:
-                    type: object
-                    properties:
-                      message:
-                        type: string
+              $ref: '#/components/responses/notFound'
+              description: Produit non trouvé.
+            "500":
+              $ref: '#/components/responses/serverError'
       /api/doc:
         get:
           tags:
