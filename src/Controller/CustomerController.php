@@ -3,10 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Customer;
-use App\Repository\ClientRepository;
 use App\Repository\CustomerRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,61 +16,70 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
+#[Route('/users', name: 'user_')]
 class CustomerController extends AbstractController
 {
     /**
      * Cette méthode permet de récupérer l'ensemble des utilisateurs d'un client.
      */
-    #[Route('/users', name: 'customers', methods: ['GET'])]
-    public function getCustomersList(CustomerRepository $customerRepository, Request $request, SerializerInterface $serializer, TagAwareCacheInterface $cachePool): JsonResponse
+    #[Route(name: 'get_collection', methods: [Request::METHOD_GET])]
+    public function getCustomersList(CustomerRepository $customerRepository, Request $request): JsonResponse
     {
         /** @var Client $client */
         $client = $this->getUser();
         $limit = $request->query->getInt('limit', 10);
         $page = $request->query->getInt('page', 1);
-        try {
-            $customers = $customerRepository->findBy(
-                ['client' => $client],
-                ['id' => 'asc'],
-                $limit,
-                ($page - 1) * $limit
-            );
-        } catch (\Exception $e) {
-            dump('Exception occurred: '.$e->getMessage());
-        }
+        $customers = $customerRepository->findAllWithPagination($client, $page, $limit);
         $total = $customerRepository->count(['client' => $client]);
         $pages = (int) ceil($total / $limit);
-
+        $currentPage = $page;
+        $totalPages = $pages;
+        $customersJson = [];
+        foreach ($customers as $customer) {
+            $customersJson[] = [
+                'id' => $customer->getId(),
+                'firstName' => $customer->getFirstName(),
+                'lastName' => $customer->getLastName(),
+                'email' => $customer->getEmail(),
+                '_links' => [
+                    'self' => [
+                        'href' => $this->generateUrl('user_get_item', ['id' => $customer->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+                    ],
+                    'user' => [
+                        'href' => $this->generateUrl('user_get_item', ['id' => $customer->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+                    ],
+                    'delete' => [
+                        'href' => $this->generateUrl('user_delete_item', ['id' => $customer->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+                    ],
+                    'put' => [
+                        'href' => $this->generateUrl('user_put_item', ['id' => $customer->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+                    ],
+                ],
+            ];
+        }
+        $links = [
+            'self' => $this->generateUrl('user_get_collection', ['page' => $currentPage, 'limit' => $limit], UrlGeneratorInterface::ABSOLUTE_URL),
+            'post' => $this->generateUrl('user_post_item', [], UrlGeneratorInterface::ABSOLUTE_URL),
+        ];
+        if ($currentPage > 1) {
+            $links['first'] = $this->generateUrl('user_get_collection', ['page' => 1, 'limit' => $limit], UrlGeneratorInterface::ABSOLUTE_URL);
+            $links['previous'] = $this->generateUrl('user_get_collection', ['page' => $currentPage - 1, 'limit' => $limit], UrlGeneratorInterface::ABSOLUTE_URL);
+        }
+        if ($currentPage < $totalPages) {
+            $links['next'] = $this->generateUrl('user_get_collection', ['page' => $currentPage + 1, 'limit' => $limit], UrlGeneratorInterface::ABSOLUTE_URL);
+            $links['last'] = $this->generateUrl('user_get_collection', ['page' => $totalPages, 'limit' => $limit], UrlGeneratorInterface::ABSOLUTE_URL);
+        }
         return $this->json(
             [
                 '_embedded' => [
-                    'users' => $customers,
+                    'users' => $customersJson,
                 ],
-                'page' => $page,
-                'pages' => $pages,
+                'page' => $currentPage,
+                'pages' => $totalPages,
                 'limit' => $limit,
-                'count' => count($customers),
+                'count' => count($customersJson),
                 'total' => $total,
-                '_links' => [
-                    'self' => [
-                        'href' => $this->generateUrl('customers', ['page' => $page, 'limit' => $limit], UrlGeneratorInterface::ABSOLUTE_URL),
-                    ],
-                    'post' => [
-                        'href' => $this->generateUrl('createCustomer', [], UrlGeneratorInterface::ABSOLUTE_URL),
-                    ],
-                    'first' => [
-                        'href' => $this->generateUrl('customers', ['page' => 1, 'limit' => $limit], UrlGeneratorInterface::ABSOLUTE_URL),
-                    ],
-                    'next' => [
-                        'href' => $this->generateUrl('customers', ['page' => $page + 1, 'limit' => $limit], UrlGeneratorInterface::ABSOLUTE_URL),
-                    ],
-                    'previous' => [
-                        'href' => $this->generateUrl('customers', ['page' => $page - 1, 'limit' => $limit], UrlGeneratorInterface::ABSOLUTE_URL),
-                    ],
-                    'last' => [
-                        'href' => $this->generateUrl('customers', ['page' => $pages, 'limit' => $limit], UrlGeneratorInterface::ABSOLUTE_URL),
-                    ],
-                ],
+                '_links' => $links,
             ],
             Response::HTTP_OK,
             [],
@@ -85,27 +92,50 @@ class CustomerController extends AbstractController
     /**
      * Cette méthode permet de récupérer le détail d'un utilisateur.
      */
-    #[Route('/users/{id}', name: 'detailCustomer', methods: ['GET'], requirements: ['id' => '\d+'])]
-    public function getDetailCustomer(Customer $customer, SerializerInterface $serializer): JsonResponse
-    {
-        $loggedClient = $this->getUser();
-        if ($customer->getClient() !== $loggedClient) {
-            return new JsonResponse(['message' => 'Customer not found.'], Response::HTTP_NOT_FOUND);
-        }
-
-        $jsonCustomer = [
-            'firstName' => $customer->getFirstName(),
-            'lastName' => $customer->getLastName(),
-            'email' => $customer->getEmail(),
-        ];
-
-        return new JsonResponse($jsonCustomer, Response::HTTP_OK, []);
+    #[Route('/{id}', name: 'get_item', methods: [Request::METHOD_GET], requirements: ['id' => '\d+'])]
+public function getDetailCustomer(Customer $customer): JsonResponse
+{
+    $loggedClient = $this->getUser();
+    if ($customer->getClient() !== $loggedClient) {
+        return new JsonResponse(['message' => 'Customer not found.'], Response::HTTP_NOT_FOUND);
     }
+    $customerId = $customer->getId();
+    return $this->json(
+        [
+            'customer' => [
+                'id' => $customerId,
+                'firstName' => $customer->getFirstName(),
+                'lastName' => $customer->getLastName(),
+                'email' => $customer->getEmail(),
+            ],
+            '_links' => [
+                'self' => [
+                    'href' => $this->generateUrl('user_get_item', ['id' => $customerId], UrlGeneratorInterface::ABSOLUTE_URL),
+                ],
+                'get' => [
+                    'href' => $this->generateUrl('user_get_item', ['id' => $customerId], UrlGeneratorInterface::ABSOLUTE_URL),
+                ],
+                'put' => [
+                    'href' => $this->generateUrl('user_put_item', ['id' => $customerId], UrlGeneratorInterface::ABSOLUTE_URL),
+                ],
+                'delete' => [
+                    'href' => $this->generateUrl('user_delete_item', ['id' => $customerId], UrlGeneratorInterface::ABSOLUTE_URL),
+                ],
+            ],
+        ],
+        Response::HTTP_OK,
+        [],
+        [
+            AbstractNormalizer::GROUPS => ['getCustomer'],
+        ]
+    );
+}
+
 
     /**
      * Cette méthode permet de supprimer un utilisateur.
      */
-    #[Route('/users/{id}', name: 'deleteCustomer', methods: ['DELETE'])]
+    #[Route('/{id}', name: 'delete_item', methods: [Request::METHOD_DELETE], requirements: ['id' => '\d+'])]
     public function deleteCustomer(Customer $customer, EntityManagerInterface $em): JsonResponse
     {
         $loggedClient = $this->getUser();
@@ -121,8 +151,8 @@ class CustomerController extends AbstractController
     /**
      * Cette méthode permet de créer un utilisateur.
      */
-    #[Route('/users', name: 'createCustomer', methods: ['POST'])]
-    public function createCustomer(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
+    #[Route(name: 'post_item', methods: [Request::METHOD_POST])]
+    public function createCustomer(Request $request, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
     {
         $loggedClient = $this->getUser();
         if (!$loggedClient instanceof \Symfony\Component\Security\Core\User\UserInterface) {
@@ -143,16 +173,25 @@ class CustomerController extends AbstractController
         }
         $em->persist($customer);
         $em->flush();
-        $context = SerializationContext::create()->setGroups(['getCustomer']);
-        $jsonCustomer = $serializer->serialize($customer, 'json', $context);
-        $location = $urlGenerator->generate('detailCustomer', ['id' => $customer->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
-
-        return new JsonResponse($jsonCustomer, Response::HTTP_CREATED, ['Location' => $location], true);
+        return $this->json(
+            $customer,
+            Response::HTTP_CREATED,
+            [
+                'content-type' => 'application/hal+json',
+                'location' => $this->generateUrl(
+                    'user_get_item',
+                    ['id' => $customer->getId()],
+                    UrlGeneratorInterface::ABSOLUTE_URL
+                ),
+            ],
+            ['groups' => ['getCustomer']]
+        );
     }
 
     /**
      * Cette méthode permet de mettre à jour un utilisateur.
      */
+    #[Route('/{id}', name: 'put_item', methods: [Request::METHOD_PUT], requirements: ['id' => '\d+'])]
     public function updateCustomer(Request $request, SerializerInterface $serializer, Customer $currentCustomer, EntityManagerInterface $em, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
     {
         $loggedClient = $this->getUser();
@@ -173,6 +212,9 @@ class CustomerController extends AbstractController
         $em->flush();
         $cache->invalidateTags(['customersCache']);
 
-        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        return $this->json(
+            null, 
+            Response::HTTP_NO_CONTENT
+        );
     }
 }
