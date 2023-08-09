@@ -69,6 +69,7 @@ class CustomerController extends AbstractController
             $links['next'] = $this->generateUrl('user_get_collection', ['page' => $currentPage + 1, 'limit' => $limit], UrlGeneratorInterface::ABSOLUTE_URL);
             $links['last'] = $this->generateUrl('user_get_collection', ['page' => $totalPages, 'limit' => $limit], UrlGeneratorInterface::ABSOLUTE_URL);
         }
+
         return $this->json(
             [
                 '_embedded' => [
@@ -86,51 +87,49 @@ class CustomerController extends AbstractController
             [
                 AbstractNormalizer::GROUPS => ['getCustomer'],
             ]
-        );
+        )->setSharedMaxAge(3600);
     }
 
     /**
      * Cette méthode permet de récupérer le détail d'un utilisateur.
      */
     #[Route('/{id}', name: 'get_item', methods: [Request::METHOD_GET], requirements: ['id' => '\d+'])]
-public function getDetailCustomer(Customer $customer): JsonResponse
-{
-    $loggedClient = $this->getUser();
-    if ($customer->getClient() !== $loggedClient) {
-        return new JsonResponse(['message' => 'Customer not found.'], Response::HTTP_NOT_FOUND);
-    }
-    $customerId = $customer->getId();
-    return $this->json(
-        [
-            'customer' => [
+    public function getDetailCustomer(Customer $customer): JsonResponse
+    {
+        $loggedClient = $this->getUser();
+        if ($customer->getClient() !== $loggedClient) {
+            return new JsonResponse(['message' => 'Customer not found.'], Response::HTTP_NOT_FOUND);
+        }
+        $customerId = $customer->getId();
+
+        return $this->json(
+            [
                 'id' => $customerId,
                 'firstName' => $customer->getFirstName(),
                 'lastName' => $customer->getLastName(),
                 'email' => $customer->getEmail(),
+                '_links' => [
+                    'self' => [
+                        'href' => $this->generateUrl('user_get_item', ['id' => $customerId], UrlGeneratorInterface::ABSOLUTE_URL),
+                    ],
+                    'get' => [
+                        'href' => $this->generateUrl('user_get_item', ['id' => $customerId], UrlGeneratorInterface::ABSOLUTE_URL),
+                    ],
+                    'put' => [
+                        'href' => $this->generateUrl('user_put_item', ['id' => $customerId], UrlGeneratorInterface::ABSOLUTE_URL),
+                    ],
+                    'delete' => [
+                        'href' => $this->generateUrl('user_delete_item', ['id' => $customerId], UrlGeneratorInterface::ABSOLUTE_URL),
+                    ],
+                ],
             ],
-            '_links' => [
-                'self' => [
-                    'href' => $this->generateUrl('user_get_item', ['id' => $customerId], UrlGeneratorInterface::ABSOLUTE_URL),
-                ],
-                'get' => [
-                    'href' => $this->generateUrl('user_get_item', ['id' => $customerId], UrlGeneratorInterface::ABSOLUTE_URL),
-                ],
-                'put' => [
-                    'href' => $this->generateUrl('user_put_item', ['id' => $customerId], UrlGeneratorInterface::ABSOLUTE_URL),
-                ],
-                'delete' => [
-                    'href' => $this->generateUrl('user_delete_item', ['id' => $customerId], UrlGeneratorInterface::ABSOLUTE_URL),
-                ],
-            ],
-        ],
-        Response::HTTP_OK,
-        [],
-        [
-            AbstractNormalizer::GROUPS => ['getCustomer'],
-        ]
-    );
-}
-
+            Response::HTTP_OK,
+            [],
+            [
+                AbstractNormalizer::GROUPS => ['getCustomer'],
+            ]
+        );
+    }
 
     /**
      * Cette méthode permet de supprimer un utilisateur.
@@ -163,16 +162,14 @@ public function getDetailCustomer(Customer $customer): JsonResponse
         $customer->setFirstName($data['firstName']);
         $customer->setLastName($data['lastName']);
         $customer->setEmail($data['email']);
+        $customer->setClient($loggedClient);
         $errors = $validator->validate($customer);
-        if (count($errors) > 0) {
-            $errorMessages = [];
-            foreach ($errors as $error) {
-                $errorMessages[$error->getPropertyPath()][] = $error->getMessage();
-            }
-            return new JsonResponse($errorMessages, JsonResponse::HTTP_BAD_REQUEST);
+        if ($errors->count() > 0) {
+            return new JsonResponse($errors, Response::HTTP_BAD_REQUEST);
         }
         $em->persist($customer);
         $em->flush();
+
         return $this->json(
             $customer,
             Response::HTTP_CREATED,
@@ -202,18 +199,17 @@ public function getDetailCustomer(Customer $customer): JsonResponse
         $currentCustomer->setFirstName($newCustomer->getFirstName());
         $currentCustomer->setLastName($newCustomer->getLastName());
         $currentCustomer->setEmail($newCustomer->getEmail());
-        $currentCustomer->setClient($newCustomer->getClient());
         $errors = $validator->validate($currentCustomer);
         if ($errors->count() > 0) {
             return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
         }
-        $currentCustomer->setClient($loggedClient);
+        $currentCustomer->setClient($loggedClient->getId());
         $em->persist($currentCustomer);
         $em->flush();
         $cache->invalidateTags(['customersCache']);
 
         return $this->json(
-            null, 
+            null,
             Response::HTTP_NO_CONTENT
         );
     }

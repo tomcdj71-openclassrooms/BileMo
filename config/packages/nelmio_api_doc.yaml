@@ -239,7 +239,7 @@ nelmio_api_doc:
             "201":
               description: Utilisateur créé
               content:
-                application/hal+json:
+                application/json:
                   schema:
                     type: object
                     properties:
