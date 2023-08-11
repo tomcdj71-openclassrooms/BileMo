@@ -1,0 +1,31 @@
+@startuml
+!theme toy
+
+actor Client
+control API
+database Database
+
+Client -> API : POST /api/users/
+Activate Client
+Activate API
+
+
+alt 400 Requête incorrecte
+  API --> Client : 400 Requête incorrecte : Données invalides
+else 401 Non autorisé
+  API --> Client : 401 Non autorisé
+else 422 Entité non traitable
+  API --> Client : 422 Entité non traitable : Données invalides
+else 500 Erreur interne du serveur
+  API --> Client : 500 Erreur interne du serveur
+else
+  API -> Database : Créer un utilisateur
+  Activate Database
+  Database --> API : Utilisateur créé
+  Deactivate Database
+  API --> Client : 201 Créé : Utilisateur créé
+end
+Deactivate Client
+Deactivate API
+
+@enduml

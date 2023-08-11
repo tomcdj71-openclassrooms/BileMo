@@ -1,0 +1,29 @@
+@startuml
+!theme toy
+
+actor Client
+control API
+database Database
+
+Client -> API : DELETE /api/users/{id}
+Activate Client
+Activate API
+
+alt 401 Non autorisé
+    API --> Client : 401 Non autorisé
+else 403 Accès refusé
+    API --> Client : 403 Accès refusé
+else 404 Non trouvé
+    API --> Client : 404 Non trouvé
+else
+    API -> Database : Supprimer l'utilisateur par ID
+    Activate Database
+    Database --> API : Utilisateur supprimé
+    Deactivate Database
+    API --> Client : 204 No Content : Utilisateur supprimé
+end
+
+Deactivate Client
+Deactivate API
+
+@enduml

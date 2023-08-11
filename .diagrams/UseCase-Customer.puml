@@ -1,0 +1,26 @@
+@startuml
+  title Use Case BileMo Customers
+  
+  skinparam packageStyle rect
+  skinparam shadowing false
+
+  actor Client as client
+
+  rectangle customers {
+    (Créer utilisateur) as createUser
+    (Voir utilisateurs) as seeUsers
+    (Modifier un utilisateur) as editUser
+    (Afficher un utilisateur) as displayUser
+    (Supprimer un utilisateur) as deleteUser
+    (Login) as loginClient
+  }
+
+
+  client --> loginClient
+
+  client --> seeUsers
+  client --> displayUser
+  client --> createUser
+  client --> editUser
+  client --> deleteUser
+@enduml

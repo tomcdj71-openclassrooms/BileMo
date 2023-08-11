@@ -1,0 +1,25 @@
+@startuml
+!theme toy
+
+actor Client
+control API
+database Database
+
+Client -> API : GET /api/users
+Activate Client
+Activate API
+
+alt 401 Non autorisé
+  API --> Client : 401 Non autorisé
+else
+  API -> Database : Récupère la liste des utilisateurs
+  Activate Database
+  Database --> API : Renvoie les données demandées
+  Deactivate Database
+  API --> Client : 200 OK : Les données sont envoyées
+end
+
+Deactivate Client
+Deactivate API
+
+@enduml

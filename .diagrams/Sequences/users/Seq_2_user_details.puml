@@ -1,0 +1,28 @@
+@startuml
+!theme toy
+
+actor Client
+control API
+database Database
+
+Client -> API : GET /api/users/{id}
+Activate Client
+Activate API
+
+alt 401 Non autorisé
+    API --> Client : 401 Non autorisé
+else 403 Accès refusé
+    API --> Client : 403 Accès refusé
+else 404 Non trouvé
+    API --> Client : 404 Non trouvé
+else
+    API -> Database : Récupérer l'utilisateur par ID
+    Activate Database
+    Database --> API : Détails de l'utilisateur
+    Deactivate Database
+    API --> Client : 200 OK : Détails de l'utilisateur
+end
+Deactivate Client
+Deactivate API
+
+@enduml

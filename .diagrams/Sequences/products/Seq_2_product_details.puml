@@ -1,0 +1,27 @@
+@startuml
+!theme toy
+
+actor Client
+control API
+database Database
+
+Client -> API : GET /api/products/{id}
+Activate Client
+Activate API
+
+alt 401 Non autorisé
+  API --> Client : 401 Non autorisé
+else 403 Accès refusé
+  API --> Client : 403 Accès refusé
+else
+  API -> Database : Récupérer le produit par ID
+  Activate Database
+  Database --> API : Détails du produit
+  Deactivate Database
+  API --> Client : 200 OK : Détails du produit
+end
+
+Deactivate Client
+Deactivate API
+
+@enduml

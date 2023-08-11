@@ -1,0 +1,35 @@
+@startuml
+!theme toy
+
+actor Client
+control API
+database Database
+
+Client -> API : PUT /api/users/{id}
+Activate Client
+Activate API
+
+alt 204 Aucun contenu
+  API --> Client : 204 Aucun contenu
+else 401 Non autorisé
+  API --> Client : 401 Non autorisé
+else 403 Accès refusé
+  API --> Client : 403 Accès refusé
+else 404 Non trouvé
+  API --> Client : 404 Non trouvé
+else 422 Entité non traitable
+  API --> Client : 422 Entité non traitable
+else 500 Erreur interne du serveur
+  API --> Client : 500 Erreur interne du serveur
+else 
+  API -> Database : Mettre à jour l'utilisateur par ID
+  Activate Database
+  Database --> API : Utilisateur mis à jour
+  Deactivate Database
+  API --> Client : 200 OK : Utilisateur mis à jour
+end
+
+Deactivate Client
+Deactivate API
+
+@enduml

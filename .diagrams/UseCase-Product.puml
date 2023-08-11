@@ -1,0 +1,18 @@
+@startuml
+  title Use Case BileMo Products
+  
+  skinparam packageStyle rect
+  skinparam shadowing false
+
+  actor Client as client
+
+  rectangle products {
+    (Voir produits) as seeProducts
+    (Afficher un produit) as displayProduct
+    (Login) as loginClient
+  }
+
+  client --> loginClient
+  client --> seeProducts
+  client --> displayProduct
+@enduml
