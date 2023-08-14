@@ -19,6 +19,7 @@ composer install --optimize-autoloader
 symfony console d:d:c
 symfony console d:m:m
 symfony console d:f:l
+symfony console lexik:jwt:generate-keypair
 symfony serve
 ```
 
@@ -79,9 +80,17 @@ symfony serve
 
 Once you've ran `symfony serve` you can open your browser and go to [http://localhost:8000/api](http://localhost:8000/api) and start using the app
 
+If you want to test the app : 
+```json
+username: company0@company.com
+password: password
+```
+
 ## About this project
 
 This project was made with [Symfony 6.3 ](https://symfony.com/releases/6.3) and [PHP 8.2.7](https://www.php.net/ChangeLog-8.php#8.2.7). 
+
+A Postman collection is also [available here](.postman_collection/BileMo.json) if you want to test the api into Postman.
 
 ## Author
 

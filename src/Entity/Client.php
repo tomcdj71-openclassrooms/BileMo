@@ -40,6 +40,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 60)]
     #[Assert\NoSuspiciousCharacters]
+    #[Assert\Type('string')]
     private ?string $name = null;
 
     #[ORM\OneToMany(mappedBy: 'client', targetEntity: Customer::class)]

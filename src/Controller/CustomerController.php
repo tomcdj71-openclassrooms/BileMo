@@ -158,6 +158,11 @@ class CustomerController extends AbstractController
             return new JsonResponse(['message' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
         $data = json_decode($request->getContent(), true);
+        try {
+        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            return new JsonResponse(['message' => 'Invalid JSON format. Maybe you missed double quotes somewhere ?'], Response::HTTP_BAD_REQUEST);
+        }
         $customer = new Customer();
         $customer->setFirstName($data['firstName']);
         $customer->setLastName($data['lastName']);
@@ -165,7 +170,15 @@ class CustomerController extends AbstractController
         $customer->setClient($loggedClient);
         $errors = $validator->validate($customer);
         if ($errors->count() > 0) {
-            return new JsonResponse($errors, Response::HTTP_BAD_REQUEST);
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $propertyPath = $error->getPropertyPath();
+                $errorMessage = $error->getMessage();
+                $fieldErrorMessage = sprintf('%s', $errorMessage);
+                
+                $errorMessages[$propertyPath] = $fieldErrorMessage;
+            }
+            return new JsonResponse($errorMessages, Response::HTTP_BAD_REQUEST);
         }
         $em->persist($customer);
         $em->flush();
