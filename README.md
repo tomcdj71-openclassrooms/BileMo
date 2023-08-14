@@ -80,6 +80,12 @@ symfony serve
 
 Once you've ran `symfony serve` you can open your browser and go to [http://localhost:8000/api](http://localhost:8000/api) and start using the app
 
+Here's the credentials for testing the app : 
+```json
+username: company0@company.com
+password: password
+```
+
 ## About this project
 
 This project was made with [Symfony 6.3 ](https://symfony.com/releases/6.3) and [PHP 8.2.7](https://www.php.net/ChangeLog-8.php#8.2.7). 
