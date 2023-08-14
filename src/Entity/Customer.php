@@ -16,22 +16,48 @@ class Customer
     private ?int $id = null;
 
     #[ORM\Column(length: 60)]
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(
+        message: 'The first name cannot be blank.',
+    )]
     #[Assert\Length(min: 2, max: 60)]
     #[Assert\NoSuspiciousCharacters]
+    #[Assert\Type(
+        type: 'string',
+        message: 'The value {{ value }} is not a valid {{ type }}.',
+    )]
+    #[Assert\Regex(
+        pattern: '/\d/',
+        match: false,
+        message: 'Your first name cannot contain a number',
+    )]
     #[Groups(['getCustomer', 'getClient'])]
     private string $firstName;
 
     #[ORM\Column(length: 60)]
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(
+        message: 'The last name cannot be blank.',
+    )]
     #[Assert\Length(min: 2, max: 60)]
     #[Assert\NoSuspiciousCharacters]
+    #[Assert\Type(
+        type: 'string',
+        message: 'The value {{ value }} is not a valid {{ type }}.',
+    )]
+    #[Assert\Regex(
+        pattern: '/\d/',
+        match: false,
+        message: 'Your last name cannot contain a number',
+    )]
     #[Groups(['getCustomer', 'getClient'])]
     private string $lastName;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
-    #[Assert\Email]
+    #[Assert\NotBlank(
+        message: 'The email cannot be blank.',
+    )]
+    #[Assert\Email(
+        message: 'The email {{ value }} is not a valid email.',
+    )]
     #[Assert\Length(max: 255)]
     #[Groups(['getCustomer', 'getClient'])]
     private string $email;
