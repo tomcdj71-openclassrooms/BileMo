@@ -191,15 +191,12 @@
 				},
 				{
 					"name": "Create User",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"firstName\": \"firstName\",\n    \"lastName\": \"lastName\",\n    \"email\": \"firstName@lastName.com\"\n}"
+							"raw": "{\n    \"firstName\": \"test\",\n    \"lastName\": \"test\",\n    \"email\": \"test@email.com\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/users",
@@ -302,7 +299,7 @@
 		},
 		{
 			"key": "jwtToken",
-			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2OTIwMDgxMzUsImV4cCI6MTY5MjAxMTczNSwicm9sZXMiOlsiUk9MRV9VU0VSIl0sInVzZXJuYW1lIjoiY29tcGFueTBAY29tcGFueS5jb20ifQ.LbCI7RqLWqk8bmuAt9OgyfHn4X5rJWLRC2aEEDYjowP9dlPx4ScqNyH5dkQStqtR_GlS-4v9NU6xQS-nhSTJFavwZ_1hklRvEnS6cCzUfzrdDlgLhk1rMbr3s64j_ZvJZKrr3JZg5RBMntoQtbxXMNJ6tq5fUCajxiwyZRytxXrMRwTAJwPqA34bNdaWkI_7kLjazUhagt-frpRoL6gLR9nYB6rrOMfUEvdMV4220RcAiscCxKEJzz9OSeU-h3Eq39pXQIdcG0NoIRwp9L2M5YvsZzlpzuE1eaBwi35llbUVhdrJQxVGM9AeY1_FapzK-qWa6lbWXlM4nmnf3ejsaw",
+			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2OTIwMTI3ODUsImV4cCI6MTY5MjAxNjM4NSwicm9sZXMiOlsiUk9MRV9VU0VSIl0sInVzZXJuYW1lIjoiY29tcGFueTBAY29tcGFueS5jb20ifQ.dG7pJq3ZRORCKN7iePWbDNwAiYMTriYcqoB5tiw9ZRaNRu5KzCuGpmWXrDC7_1UUaxjyas3d_rf58mxSs8dXoz99G7SSYcAxIPJ3u-3Kd0BJL4FKtqfCtvclnU2b17dwrYPtnym-UDbSNMa2RUCMC1Xq79-e8T10TN6Mrg55qWPjT5bUS5MXvrQJbseJ8SEwjuNBeOBiqLZDyArxhTak5So7PX3p_Tf_8D9m8329elwNmhddbZ6bfYAQ4TdKW4mh_f7C-RyNBljdpNkp2duCBMRi28A6RUzdsj7um1dVO-gW8AvDWj45Yd3TGWt3Jav4nTPlFudzF17G3hwrndfXWw",
 			"type": "default"
 		}
 	]
