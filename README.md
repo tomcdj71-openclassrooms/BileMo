@@ -19,6 +19,7 @@ composer install --optimize-autoloader
 symfony console d:d:c
 symfony console d:m:m
 symfony console d:f:l
+symfony console lexik:jwt:generate-keypair
 symfony serve
 ```
 
